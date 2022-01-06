@@ -54,7 +54,17 @@ func Validate(c *cli.Context) error {
 	replaced := b.String()
 
 	if err := json.Unmarshal([]byte(replaced), &map[string]interface{}{}); err != nil {
-		offset := err.(*json.SyntaxError).Offset
+		var offset int64
+		var e1 *json.UnmarshalTypeError
+		var e2 *json.SyntaxError
+		if xerrors.As(err, &e1) {
+			offset = err.(*json.UnmarshalTypeError).Offset
+		} else if xerrors.As(err, &e2) {
+			offset = err.(*json.SyntaxError).Offset
+		} else {
+			fmt.Println(xerrors.Errorf("failed to unmarshal: %w", err))
+			os.Exit(2)
+		}
 		failedLine := countNewLineOfBytes(replaced[0:offset]) + 1
 		fmt.Printf("syntax error at line %d\n", failedLine)
 

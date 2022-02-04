@@ -1,4 +1,4 @@
-module jv
+module github.com/teru01/jv
 
 go 1.16
 
